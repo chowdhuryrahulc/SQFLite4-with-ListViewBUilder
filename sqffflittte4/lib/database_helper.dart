@@ -15,21 +15,28 @@ class DBManager {
           join(await getDatabasesPath(), "Student.db"),
           version: 1, onCreate: (Database db, int version) async {
         await db.execute(
-            "CREATE TABLE student (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, course TEXT)");
+            "CREATE TABLE student (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, name TEXT, course TEXT)");
       });
     }
   }
 
   Future<int> insertStudent(Student student) async {
+    //! this return int is autoincrementing. but not saved to ID. But it is saved to Database
     await openDb();
-    return await _database!.insert('student', student.toMap());
+    return await _database!
+        .insert('student', student.toMap()); //? this returns int.
   }
 
   Future<List<Student>> getStudentList() async {
     await openDb();
     final List<Map<String, dynamic>> maps = await _database!.query('student');
-    return List.generate(maps.length,
-        (i) => Student(name: maps[i]['name'], course: maps[i]['course']));
+    print(maps);
+    return List.generate(
+        maps.length,
+        (i) => Student(
+            id: maps[i]['id'],
+            name: maps[i]['name'],
+            course: maps[i]['course']));
   }
 
   Future<int> updateStudent(Student student) async {
@@ -52,6 +59,6 @@ class Student {
 
   Student({this.id, required this.name, required this.course});
   Map<String, dynamic> toMap() {
-    return {'name': name, 'course': course};
+    return {'id': id, 'name': name, 'course': course};
   }
 }
